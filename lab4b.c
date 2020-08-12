@@ -16,36 +16,29 @@ struct _gpio {
 typedef struct _aio* mraa_aio_context;
 typedef struct _gpio* mraa_gpio_context;;
 int mraa_aio_read(mraa_aio_context c) {
-	if(c)
-		return 650;
+	c->pin = 1;
 	return 650;
 }
 
 void mraa_aio_close(mraa_aio_context c) {
-	if(c)
-		return;
+	c->pin = 1;
 	return;
 }
 
 mraa_aio_context mraa_aio_init(int num) {
 	mraa_aio_context c = malloc(sizeof(struct _aio));
 	c->pin = num;
-	if(num)
-		return c;
 	return c;
 }
 
 mraa_gpio_context mraa_gpio_init(int num) {
 	mraa_gpio_context c = malloc(sizeof(struct _gpio));
 	c->pin = num;
-	if(num)
-		return c;
 	return c;
 }
 
 void mraa_gpio_dir(mraa_gpio_context c, int i) {
-	if(c || i)
-		return;
+	c->pin = i;
 	return;
 }
 
@@ -56,8 +49,7 @@ void mraa_gpio_isr(mraa_gpio_context c, int i, void* fun, void* k){
 }
 
 void mraa_gpio_close(mraa_gpio_context c) {
-	if(c)
-		return;
+	c->pin = 1;
 	return;
 }
 
@@ -70,14 +62,14 @@ void mraa_gpio_close(mraa_gpio_context c) {
 #include <unistd.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <string.h>
+#include <math.h>
 #include <poll.h>
 #include <signal.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/errno.h>
+#include <sys/types.h>
 #include <time.h>
 #include <sys/time.h>
-#include <math.h>
 #include <ctype.h>
 #include <fcntl.h>
 
