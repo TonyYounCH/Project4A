@@ -99,7 +99,7 @@ void report_temp() {
 	// if it is time to report temperature && !stop
 	// read from temperature sensor, convert and report
 	time(&end);
-	if(difftime(end, begin) < period && !stop) {
+	if(difftime(end, begin) >= period && !stop) {
 		time(&begin);
 		// int reading = mraa_aio_read(temp);
 		int reading = 650;
