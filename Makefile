@@ -3,7 +3,9 @@
 # ID: 304207830
 
 default:
-	gcc -g -lm -lmraa -Wall -Wextra -DDUMMY lab4b.c -o lab4b
+# 	gcc -g -lm -lmraa -Wall -Wextra -DDUMMY lab4b.c -o lab4b
+	chmod +x ./compile.sh
+	./compile.sh
 
 check: default
 	{ echo "START"; sleep 2; echo "STOP"; sleep 2; echo "OFF"; } | ./lab4b --log=log.txt
@@ -30,7 +32,7 @@ check: default
 
 
 dist: check
-	tar -czf lab4b-304207830.tar.gz lab4b.c Makefile README
+	tar -czf lab4b-304207830.tar.gz lab4b.c Makefile README compile.sh
 
 clean:
 	rm -f *.o lab4b *.txt *.tar.gz

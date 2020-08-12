@@ -137,8 +137,6 @@ void process_stdin(char *input) {
 
 int main(int argc, char* argv[]) {
 	int opt = 0;
-
-
 	struct option options[] = {
 		{"period", 1, NULL, PERIOD},
 		{"scale", 1, NULL, SCALE},
