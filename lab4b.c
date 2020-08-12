@@ -117,19 +117,19 @@ void process_stdin(char *input) {
 	char *in_log = strstr(input, "LOG");
 
 	if(strcmp(input, "SCALE=F") == 0) {
-		print(input, 0);
+		// print(input, 0);
 		scale = 'F'; 
 	} else if(strcmp(input, "SCALE=C") == 0) {
-		print(input, 0);
+		// print(input, 0);
 		scale = 'C'; 
 	} else if(strcmp(input, "STOP") == 0) {
-		print(input, 0);
+		// print(input, 0);
 		stop = 0;
 	} else if(strcmp(input, "START") == 0) {
-		print(input, 0);
+		// print(input, 0);
 		stop = 1;
 	} else if(strcmp(input, "OFF") == 0) {
-		print(input, 0);
+		// print(input, 0);
 		do_when_interrupted();
 	} else if(in_per == input) {
 		char *n = input;
@@ -144,9 +144,9 @@ void process_stdin(char *input) {
 			}
 			period = p;
 		}
-		print(input, 0);
+		// print(input, 0);
 	} else if (in_log == input) {
-		print(input, 0); 
+		// print(input, 0); 
 	}
 }
 
