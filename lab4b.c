@@ -40,6 +40,7 @@ char scale = 'F';
 int stop = 0;
 time_t begin = 0;
 time_t end = 0;
+FILE *file = 0;
 
 mraa_aio_context temp;
 mraa_gpio_context button;
