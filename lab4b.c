@@ -4,6 +4,7 @@ EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
 #ifdef DUMMY
+#include <stdlib.h>
 #define MRAA_GPIO_IN 0
 #define MRAA_GPIO_EDGE_RISING 1
 struct _aio {
@@ -61,11 +62,11 @@ void mraa_gpio_close(mraa_gpio_context c) {
 }
 
 #else
+#include <stdlib.h>
 #include <mraa.h>
 #include <mraa/aio.h>
 #endif
 
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -78,6 +79,7 @@ void mraa_gpio_close(mraa_gpio_context c) {
 #include <sys/time.h>
 #include <math.h>
 #include <ctype.h>
+#include <fcntl.h>
 
 #define PERIOD 'p'
 #define SCALE 's'
