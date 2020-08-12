@@ -46,6 +46,9 @@ void do_when_interrupted() {
 	clock_gettime(CLOCK_REALTIME, &ts);
 	tm = localtime(&(ts.tv_sec));
 	fprintf(stdout, "%.2d:%.2d:%.2d SHUTDOWN\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
+	if(log_flag) {
+		dprintf(logfd, "%.2d:%.2d:%.2d SHUTDOWN\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
+	}
 	exit(0);
 }
 
@@ -55,6 +58,9 @@ void curr_temp_report(float temperature){
 	clock_gettime(CLOCK_REALTIME, &ts);
 	tm = localtime(&(ts.tv_sec));
 	fprintf(stdout, "%.2d:%.2d:%.2d %.1f\n", tm->tm_hour, tm->tm_min, tm->tm_sec, temperature);
+	if(log_flag && !stop) {
+		dprintf(logfd, "%.2d:%.2d:%.2d %.1f\n", tm->tm_hour, tm->tm_min, tm->tm_sec, temperature);
+	}
 }
 
 void initialize_the_sensors() {
@@ -105,33 +111,38 @@ void report_temp() {
 }
 
 void process_stdin(char *input) {
-    if(strcmp(input, "OFF") == 0){
-        do_when_interrupted();
-    }
-    else if(strcmp(input, "START") == 0){
-    	stop = 0;
-    }
-    else if(strcmp(input, "STOP") == 0){
-    	stop = 1;
-    }
-    else if(strcmp(input, "SCALE=F") == 0){
-        scale = 'F';
-    }
-    else if(strcmp(input, "SCALE=C") == 0){
-        scale = 'C';
-    }
-    else if(strncmp(input, "PERIOD=", sizeof(char)*7) == 0){
-        period = (int)atoi(input+7);
-    }
-    else if((strncmp(input, "LOG", sizeof(char)*3) == 0)){
-        if(log_flag){
-        	dprintf(logfd, "%s\n", input);
-        }
-    }
-    else {
-        fprintf(stdout, "Command not recognized\n");
-        exit(1);
-    }
+	if(strcmp(input, "OFF") == 0){
+		if(log_flag)
+			dprintf(logfd, "OFF\n");
+		do_when_interrupted();
+	} else if(strcmp(input, "START") == 0){
+		stop = 0;
+		if(log_flag)
+			dprintf(logfd, "START\n");
+	} else if(strcmp(input, "STOP") == 0){
+		stop = 1;
+		if(log_flag)
+			dprintf(logfd, "STOP\n");
+	} else if(strcmp(input, "SCALE=F") == 0){
+		scale = 'F';
+		if(log_flag)
+			dprintf(logfd, "SCALE=F\n");
+	} else if(strcmp(input, "SCALE=C") == 0){
+		scale = 'C';
+		if(log_flag)
+			dprintf(logfd, "SCALE=C\n");
+	} else if(strncmp(input, "PERIOD=", sizeof(char)*7) == 0){
+		period = (int)atoi(input+7);
+		if(log_flag)
+			dprintf(logfd, "PERIOD=%d\n", period);
+	} else if((strncmp(input, "LOG", sizeof(char)*3) == 0)){
+		if(log_flag){
+			dprintf(logfd, "%s\n", input);
+		}
+	} else {
+		fprintf(stdout, "Command cannot be recognized\n");
+		exit(1);
+	}
 }
 
 
@@ -182,11 +193,11 @@ int main(int argc, char* argv[]) {
 	pollfd.fd = 0;
 	pollfd.events = POLLIN;
 
-    char commandBuff[128];
-    char copyBuff[128];
-    memset(commandBuff, 0, 128);
-    memset(copyBuff, 0, 128);
-    int copyIndex = 0;
+	char commandBuff[128];
+	char copyBuff[128];
+	memset(commandBuff, 0, 128);
+	memset(copyBuff, 0, 128);
+	int copyIndex = 0;
 	while (1) {
 		// if it is time to report temperature && !stop
 		// read from temperature sensor, convert and report
