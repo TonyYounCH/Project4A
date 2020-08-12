@@ -91,7 +91,8 @@ float convert_temper_reading(int reading) {
 	} else { //return value in C
 		return ret; 
 	}
-} 
+
+}
 
 void report_temp() {
 	// if it is time to report temperature && !stop
@@ -103,7 +104,6 @@ void report_temp() {
 		int reading = 650;
 		float temperature = convert_temper_reading(reading);
 		curr_temp_report(temperature);
-
 	}
 }
 
