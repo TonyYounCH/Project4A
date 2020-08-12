@@ -41,6 +41,7 @@ int stop = 0;
 time_t begin = 0;
 time_t end = 0;
 FILE *file = 0;
+int log_flag = 0;
 
 mraa_aio_context temp;
 mraa_gpio_context button;
@@ -109,46 +110,34 @@ void report_temp() {
 }
 
 void process_stdin(char *input) {
-	int EOL = strlen(input); 
-	input[EOL-1] = '\0';
-	while(*input == ' ' || *input == '\t') {
-		input++;
-	}
-	char *in_per = strstr(input, "PERIOD=");
-	char *in_log = strstr(input, "LOG");
-
-	if(strcmp(input, "SCALE=F") == 0) {
-		// print(input, 0);
-		scale = 'F'; 
-	} else if(strcmp(input, "SCALE=C") == 0) {
-		// print(input, 0);
-		scale = 'C'; 
-	} else if(strcmp(input, "STOP") == 0) {
-		// print(input, 0);
-		stop = 0;
-	} else if(strcmp(input, "START") == 0) {
-		// print(input, 0);
-		stop = 1;
-	} else if(strcmp(input, "OFF") == 0) {
-		// print(input, 0);
-		do_when_interrupted();
-	} else if(in_per == input) {
-		char *n = input;
-		n += 7; 
-		if(*n != 0) {
-			int p = atoi(n);
-			while(*n != 0) {
-				if (!isdigit(*n)) {
-					return;
-				}
-				n++;
-			}
-			period = p;
-		}
-		// print(input, 0);
-	} else if (in_log == input) {
-		// print(input, 0); 
-	}
+    if(strcmp(input, "OFF") == 0){
+        fprintf(stdout, "OFF\n");
+        do_when_interrupted();
+    }
+    else if(strcmp(input, "START") == 0){
+    	stop = 0;
+    }
+    else if(strcmp(input, "STOP") == 0){
+    	stop = 1;
+    }
+    else if(strcmp(input, "SCALE=F") == 0){
+        scale = 'F';
+    }
+    else if(strcmp(input, "SCALE=C") == 0){
+        scale = 'C';
+    }
+    else if(strncmp(input, "PERIOD=", sizeof(char)*7) == 0){
+        period = (int)atoi(input+7);
+    }
+    else if((strncmp(input, "LOG", sizeof(char)*3) == 0)){
+        if(log_flag){
+        	dprintf(logfd, "%s\n", input);
+        }
+    }
+    else {
+        fprintf(stdout, "Command not recognized\n");
+        exit(1);
+    }
 }
 
 
@@ -180,6 +169,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case LOG:
 				// log file
+				log_flag = 1;
 				file = fopen(optarg, "w+");
 				if(file == NULL) {
 					fprintf(stderr, "Failed to open log file");
