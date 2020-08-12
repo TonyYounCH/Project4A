@@ -159,7 +159,6 @@ int main(int argc, char* argv[]) {
 		{0, 0, 0, 0}
 	};
 
-	ssize_t i;
 	while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
 		switch (opt) {
 			case PERIOD: 
@@ -202,7 +201,7 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "Could not allocate input buffer\n");
 		exit(1);
 	}
-	while (true) {
+	while (1) {
 		// if it is time to report temperature && !stop
 		// read from temperature sensor, convert and report
 		report_temp();
