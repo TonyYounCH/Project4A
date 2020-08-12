@@ -65,9 +65,9 @@ void shutdown() {
 	curr_time = localtime(&my_clock.tv_sec);
 	char out[200];
 	sprintf(out, "%02d:%02d:%02d SHUTDOWN", curr_time->tm_hour, 
-    		curr_time->tm_min, curr_time->tm_sec);
-    	print(out,1);
-    	exit(0);
+			curr_time->tm_min, curr_time->tm_sec);
+		print(out,1);
+		exit(0);
 }
 
 /* prints out the time stamp and temperature */
@@ -78,10 +78,10 @@ void time_stamp() {
 		int t = temp * 10;
 		curr_time = localtime(&my_clock.tv_sec);
 		char out[200];
-    		sprintf(out, "%02d:%02d:%02d %d.%1d", curr_time->tm_hour, 
-    			curr_time->tm_min, curr_time->tm_sec, t/10, t%10);
-    		print(out,1);
-    		next_time = my_clock.tv_sec + period; 
+			sprintf(out, "%02d:%02d:%02d %d.%1d", curr_time->tm_hour, 
+				curr_time->tm_min, curr_time->tm_sec, t/10, t%10);
+			print(out,1);
+			next_time = my_clock.tv_sec + period; 
 	}
 }
 
@@ -132,83 +132,83 @@ void process_stdin(char *input) {
 
 int main(int argc, char* argv[]) {
 
-	struct option options[] = {
-		{"period", required_argument, NULL, 'p'},
-   		{"scale", required_argument, NULL, 's'},
-    		{"log", required_argument, NULL, 'l'},
-    		{0, 0, 0, 0}
-	};
+	// struct option options[] = {
+	// 	{"period", required_argument, NULL, 'p'},
+	// 	{"scale", required_argument, NULL, 's'},
+	// 		{"log", required_argument, NULL, 'l'},
+	// 		{0, 0, 0, 0}
+	// };
 
-	int opt;
+	// int opt;
 
-	while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
-		switch (opt) {
-			case 'p': 
-				period = atoi(optarg);
-				break;
+	// while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
+	// 	switch (opt) {
+	// 		case 'p': 
+	// 			period = atoi(optarg);
+	// 			break;
 
-			case 'l':
-				file = fopen(optarg, "w+");
-            	if(file == NULL) {
-            		fprintf(stderr, "Logfile invalid\n");
-					exit(1);
-				}
-				break;
+	// 		case 'l':
+	// 			file = fopen(optarg, "w+");
+	// 			if(file == NULL) {
+	// 				fprintf(stderr, "Logfile invalid\n");
+	// 				exit(1);
+	// 			}
+	// 			break;
 
-			case 's':
-				if (optarg[0] == 'F' || optarg[0] == 'C') {
-					scale = optarg[0];
-					break;
-				}
+	// 		case 's':
+	// 			if (optarg[0] == 'F' || optarg[0] == 'C') {
+	// 				scale = optarg[0];
+	// 				break;
+	// 			}
 
-			default:
-				fprintf(stderr, "Error in arguments.\n");
-				exit(1);
-				break;
-		}
-	}
+	// 		default:
+	// 			fprintf(stderr, "Error in arguments.\n");
+	// 			exit(1);
+	// 			break;
+	// 	}
+	// }
 
 	temp = mraa_aio_init(A0);
 
 	if (temp== NULL) {
-        	fprintf(stderr, "Failed to initialize AIO\n");
-        	mraa_deinit();
-        	return EXIT_FAILURE;
-    	}
-
-    	button = mraa_gpio_init(GPIO_50);
-
-    	if (button == NULL) {
-        	fprintf(stderr, "Failed to initialize GPIO_50\n");
-        	mraa_deinit();
-        	return EXIT_FAILURE;
-    	}
-
-    	mraa_gpio_dir(button, MRAA_GPIO_IN);
-    	mraa_gpio_isr(button, MRAA_GPIO_EDGE_RISING, &shutdown, NULL);
-
-	struct pollfd pollInput; 
-    		pollInput.fd = STDIN_FILENO; 
-    		pollInput.events = POLLIN; 
-
-    	char *input;
-    	input = (char *)malloc(1024 * sizeof(char));
-    	if(input == NULL) {
-    		fprintf(stderr, "Could not allocate input buffer\n");
-    		exit(1);
-    	}
-
-    	while(1) {
-  		time_stamp();
-    		int ret = poll(&pollInput, 1, 0);
-    		if(ret) {
-    			fgets(input, 1024, stdin);
-    			process_stdin(input); 
-    		}
+		fprintf(stderr, "Failed to initialize AIO\n");
+		mraa_deinit();
+		return EXIT_FAILURE;
 	}
 
-	mraa_aio_close(temp);
-    	mraa_gpio_close(button);
+	button = mraa_gpio_init(GPIO_50);
 
-    	return 0;
+	if (button == NULL) {
+		fprintf(stderr, "Failed to initialize GPIO_50\n");
+		mraa_deinit();
+		return EXIT_FAILURE;
+	}
+
+	mraa_gpio_dir(button, MRAA_GPIO_IN);
+	mraa_gpio_isr(button, MRAA_GPIO_EDGE_RISING, &shutdown, NULL);
+
+	struct pollfd pollInput; 
+	pollInput.fd = STDIN_FILENO; 
+	pollInput.events = POLLIN; 
+
+	char *input;
+	input = (char *)malloc(1024 * sizeof(char));
+	if(input == NULL) {
+		fprintf(stderr, "Could not allocate input buffer\n");
+		exit(1);
+	}
+
+	// while(1) {
+	// 	time_stamp();
+	// 	int ret = poll(&pollInput, 1, 0);
+	// 	if(ret) {
+	// 		fgets(input, 1024, stdin);
+	// 		process_stdin(input); 
+	// 	}
+	// }
+
+	// mraa_aio_close(temp);
+	// mraa_gpio_close(button);
+
+	return 0;
 }
