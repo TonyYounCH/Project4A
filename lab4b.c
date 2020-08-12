@@ -198,17 +198,17 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	// while(1) {
-	// 	time_stamp();
-	// 	int ret = poll(&pollInput, 1, 0);
-	// 	if(ret) {
-	// 		fgets(input, 1024, stdin);
-	// 		process_stdin(input); 
-	// 	}
-	// }
+	while(1) {
+		time_stamp();
+		int ret = poll(&pollInput, 1, 0);
+		if(ret) {
+			fgets(input, 1024, stdin);
+			process_stdin(input); 
+		}
+	}
 
 	// mraa_aio_close(temp);
-	// mraa_gpio_close(button);
+	mraa_gpio_close(button);
 
 	return 0;
 }
