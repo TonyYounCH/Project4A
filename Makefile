@@ -3,7 +3,7 @@
 # ID: 304207830
 
 default:
-	gcc -g -lm -lmraa -Wall -Wextra lab4b.c -o lab4b
+	gcc -g -lm -lmraa -Wall -Wextra -DDUMMY lab4b.c -o lab4b
 
 check: default
 	{ echo "START"; sleep 2; echo "STOP"; sleep 2; echo "OFF"; } | ./lab4b --log=log.txt

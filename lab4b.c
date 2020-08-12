@@ -3,17 +3,18 @@ NAME: Changhui Youn
 EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
-// #ifdef DUMMY
-// #define	MRAA_GPIO_IN	0
-// typedef int mraa_aio_context;
-// typedef int mraa_gpio_context;
-// int mraa_aio_read(mraa_aio_context c)    {
-// 	return 650;
-// }
-// void mraa_aio_close(mraa_aio_context c)  {
-// }
-// #else
-// #endif
+#ifdef DUMMY
+#define	MRAA_GPIO_IN	0
+typedef int mraa_aio_context;
+typedef int mraa_gpio_context;
+int mraa_aio_read(mraa_aio_context c)    {
+	return 650;
+}
+void mraa_aio_close(mraa_aio_context c)  {
+}
+#else
+#include <mraa/aio.h>
+#endif
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -29,7 +30,6 @@ ID: 304207830
 #include <math.h>
 #include <ctype.h>
 #include <mraa.h>
-#include <mraa/aio.h>
 
 #define PERIOD 'p'
 #define SCALE 's'
@@ -102,8 +102,8 @@ void report_temp() {
 	time(&end);
 	if(difftime(end, begin) >= period && !stop) {
 		time(&begin);
-		// int reading = mraa_aio_read(temp);
-		int reading = 650;
+		int reading = mraa_aio_read(temp);
+		// int reading = 650;
 		float temperature = convert_temper_reading(reading);
 		curr_temp_report(temperature);
 	}
@@ -111,7 +111,6 @@ void report_temp() {
 
 void process_stdin(char *input) {
     if(strcmp(input, "OFF") == 0){
-        fprintf(stdout, "OFF\n");
         do_when_interrupted();
     }
     else if(strcmp(input, "START") == 0){
@@ -229,7 +228,7 @@ int main(int argc, char* argv[]) {
 		// 	log and exit. 
 	}
 
-	// mraa_aio_close(temp);
+	mraa_aio_close(temp);
 	mraa_gpio_close(button);
 
 	return 0;
