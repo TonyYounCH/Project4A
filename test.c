@@ -85,10 +85,10 @@ void create_report(double temp) {
 }//help with time from https://www.tutorialspoint.com/c_standard_library/c_function_localtime.htm
 
 void initSensors(){
-    sensor = mraa_aio_init(1);
-    if(sensor == NULL){
-        print_errors("temp");
-    }
+    // sensor = mraa_aio_init(1);
+    // if(sensor == NULL){
+    //     print_errors("temp");
+    // }
     button = mraa_gpio_init(60);
     if(button == NULL){
     	print_errors("button");
@@ -204,7 +204,8 @@ void setupPollandTime(){
     polls[0].fd = STDIN_FILENO;
     polls[0].events = POLLIN | POLLERR | POLLHUP;
     for(;;){
-        int value = mraa_aio_read(sensor);
+        // int value = mraa_aio_read(sensor);
+        int value = 650;
         double tempValue = getTemp(value);
         if(!stopReports){
             create_report(tempValue);
