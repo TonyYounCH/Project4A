@@ -13,8 +13,6 @@ int mraa_aio_read(mraa_aio_context c)    {
 void mraa_aio_close(mraa_aio_context c)  {
 }
 #else
-#include <mraa.h>
-#include <mraa/aio.h>
 #endif
 
 #include <unistd.h>
@@ -30,6 +28,8 @@ void mraa_aio_close(mraa_aio_context c)  {
 #include <sys/time.h>
 #include <math.h>
 #include <ctype.h>
+#include <mraa.h>
+#include <mraa/aio.h>
 
 #define PERIOD 'p'
 #define SCALE 's'
