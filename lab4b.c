@@ -81,17 +81,18 @@ void initialize_the_sensors() {
 }
 
 float convert_temper_reading(int reading) {
-	int therm = 4275;
-	float nom = 100000.0;
 	float R = 1023.0/((float) reading) - 1.0;
-	R *= nom;
-	float ret = 1.0/(log(R/nom)/therm + 1/298.15) - 273.15; 
-	if (scale == 'F') { //convert temperature to F
-		return (ret * 9)/5 + 32; 
-	} else { //return value in C
-		return ret; 
-	}
-
+	float R0 = 100000.0;
+	float B = 4275;
+	R = R0*R;
+	//C is the temperature in Celcious
+	float C = 1.0/(log(R/R0)/B + 1/298.15) - 273.15;
+	//F is the temperature in Fahrenheit
+	float F = (C * 9)/5 + 32;
+	if(scale == 'C')
+		return C;
+	else
+		return F;
 }
 
 void report_temp() {
@@ -198,12 +199,11 @@ int main(int argc, char* argv[]) {
 	pollfd.fd = 0;
 	pollfd.events = POLLIN;
 
-	char *input;
-	input = (char *)malloc(1024 * sizeof(char));
-	if(input == NULL) {
-		fprintf(stderr, "Could not allocate input buffer\n");
-		exit(1);
-	}
+    char commandBuff[128];
+    char copyBuff[128];
+    memset(commandBuff, 0, 128);
+    memset(copyBuff, 0, 128);
+    int copyIndex = 0;
 	while (1) {
 		// if it is time to report temperature && !stop
 		// read from temperature sensor, convert and report
@@ -211,10 +211,28 @@ int main(int argc, char* argv[]) {
 
 		 // use poll syscalls, no or very short< 50ms timeout interval
 		int ret = poll(&pollfd, 1, 0);
-		if (ret) {   
-			fgets(input, 1024, 0);
-			process_stdin(input); 
-		} 	
+		if(ret < 0){
+			print_errors("poll");
+		}
+		if(polls[0].revents && POLLIN){
+			int num = read(STDIN_FILENO, commandBuff, 128);
+			if(num < 0){
+				fprintf(stderr, "Failed to read from poll\n");
+			}
+			int i;
+			for(i = 0; i < num && copyIndex < 128; i++){
+				if(commandBuff[i] =='\n'){
+					process_stdin((char*)&copyBuff);
+					copyIndex = 0;
+					memset(copyBuff, 0, 128); //clear
+				}
+				else {
+					copyBuff[copyIndex] = commandBuff[i];
+					copyIndex++;
+				}
+			}
+			
+		}
 
 		// if (push button is pressed) 
 		// 	log and exit. 
