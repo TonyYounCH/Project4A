@@ -4,9 +4,9 @@ EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
 #ifdef DUMMY
-#define DUM = 1;
+#define DUM 1;
 #else
-#define DUM = 0;
+#define DUM 0;
 #endif
 
 #include <unistd.h>
