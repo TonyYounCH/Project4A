@@ -1,8 +1,21 @@
-/* 
- * Name: Natasha Sarkar
- * Email: nat41575@gmail.com
- * ID: 904743795
- */
+/*
+NAME: Changhui Youn
+EMAIL: tonyyoun2@gmail.com
+ID: 304207830
+*/
+#ifdef DUMMY
+#define	MRAA_GPIO_IN	0
+typedef int mraa_aio_context;
+typedef int mraa_gpio_context;
+int mraa_aio_read(mraa_aio_context c)    {
+	return 650;
+}
+void mraa_aio_close(mraa_aio_context c)  {
+}
+#else
+#include <mraa.h>
+#include <mraa/aio.h>
+#endif
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -17,75 +30,79 @@
 #include <sys/time.h>
 #include <math.h>
 #include <ctype.h>
-#include <mraa.h>
 
-#define A0 1
-#define GPIO_50 60
+#define PERIOD 'p'
+#define SCALE 's'
+#define LOG 'l'
 
-char scale = 'F';
 int period = 1;
-FILE *file = 0;
-int report = 1;
-struct tm *curr_time;
-struct timeval my_clock;
-time_t next_time = 0;
+char scale = 'F';
+int stop = 0;
+time_t begin = 0;
+time_t end = 0;
 
-mraa_aio_context temp; 
-mraa_gpio_context button; 
+mraa_aio_context temp;
+mraa_gpio_context button;
 
-/* gets temperature */
-float get_temp() {
-	int temperature = 650;
-	int therm = 4275;
-	float nom = 100000.0;
-	float R = 1023.0/((float) temperature) - 1.0;
-	R *= nom;
-	float ret = 1.0/(log(R/nom)/therm + 1/298.15) - 273.15; 
-	if (scale == 'F') { //convert temperature to F
-		return (ret * 9)/5 + 32; 
-	} else { //return value in C
-		return ret; 
+void do_when_interrupted() {
+	struct timespec ts;
+	struct tm * tm;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	tm = localtime(&(ts.tv_sec));
+	fprintf(stdout, "%.2d:%.2d:%.2d SHUTDOWN\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
+	exit(0);
+}
+
+void curr_temp_report(float temperature){
+	struct timespec ts;
+	struct tm * tm;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	tm = localtime(&(ts.tv_sec));
+	fprintf(stdout, "%.2d:%.2d:%.2d %.1f\n", tm->tm_hour, tm->tm_min, tm->tm_sec, temperature);
+}
+
+void initialize_the_sensors() {
+	// temp = mraa_aio_init(1);
+	// if (temp == NULL) {
+	// 	fprintf(stderr, "Failed to init aio\n");
+	// 	exit(1);
+	// }
+
+	button = mraa_gpio_init(60);
+	if (button == NULL) {
+		fprintf(stderr, "Failed to init button\n");
+		exit(1);
+	}
+
+	mraa_gpio_dir(button, MPAA_GPIO_IN);
+	mraa_gpio_isr(button, MRAA_GPIO_EDGE_RISING, &do_when_interrupted, NULL);
+
+}
+
+void report_temp() {
+	// if it is time to report temperature && !stop
+	// read from temperature sensor, convert and report
+	time(&end);
+	if(difftime(end, begin) < period && !stop) {
+		time(&begin);
+		// int reading = mraa_aio_read(temp);
+		int reading = 650;
+		float temperature = convert_temper_reading(reading);
+		curr_temp_report(temperature);
+
 	}
 }
 
-/* prints to stdout and file */
-void print(char *str, int to_stdout) {
-	if (to_stdout == 1) {
-		fprintf(stdout, "%s\n", str);
-	} 
+float convert_temper_reading(int reading) {
+	float R = 1023.0/((float) reading) - 1.0;
+	R = R0*R;
+	//C is the temperature in Celcious
+	float C = 1.0/(log(R/R0)/B + 1/298.15) - 273.15;
+	//F is the temperature in Fahrenheit
+	float F = (C * 9)/5 + 32;
+	return flag == 'C'? C: F;
+} 
 
-	if (file != 0) {
-		fprintf(file, "%s\n", str);
-		fflush(file);
-	}
-}
-
-/* shuts down, prints shut down time */
-void shutdown() {
-	curr_time = localtime(&my_clock.tv_sec);
-	char out[200];
-	sprintf(out, "%02d:%02d:%02d SHUTDOWN", curr_time->tm_hour, 
-			curr_time->tm_min, curr_time->tm_sec);
-		print(out,1);
-		exit(0);
-}
-
-/* prints out the time stamp and temperature */
-void time_stamp() {
-	gettimeofday(&my_clock, 0);
-	if (report && my_clock.tv_sec >= next_time) {
-		float temp = get_temp();
-		int t = temp * 10;
-		curr_time = localtime(&my_clock.tv_sec);
-		char out[200];
-			sprintf(out, "%02d:%02d:%02d %d.%1d", curr_time->tm_hour, 
-				curr_time->tm_min, curr_time->tm_sec, t/10, t%10);
-			print(out,1);
-			next_time = my_clock.tv_sec + period; 
-	}
-}
-
-/* parse input from stdin */
 void process_stdin(char *input) {
 	int EOL = strlen(input); 
 	input[EOL-1] = '\0';
@@ -109,7 +126,7 @@ void process_stdin(char *input) {
 		report = 1;
 	} else if(strcmp(input, "OFF") == 0) {
 		print(input, 0);
-		shutdown();
+		do_when_interrupted();
 	} else if(in_per == input) {
 		char *n = input;
 		n += 7; 
@@ -131,65 +148,52 @@ void process_stdin(char *input) {
 
 
 int main(int argc, char* argv[]) {
+	int opt = 0;
+
 
 	struct option options[] = {
-		{"period", required_argument, NULL, 'p'},
-		{"scale", required_argument, NULL, 's'},
-			{"log", required_argument, NULL, 'l'},
-			{0, 0, 0, 0}
+		{"period", 1, NULL, PERIOD},
+		{"scale", 1, NULL, SCALE},
+		{"log", 1, NULL, LOG},
+		{0, 0, 0, 0}
 	};
 
-	int opt;
-
+	ssize_t i;
 	while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
 		switch (opt) {
-			case 'p': 
+			case PERIOD: 
+				// get checking period
 				period = atoi(optarg);
 				break;
-
-			case 'l':
-				file = fopen(optarg, "w+");
-				if(file == NULL) {
-					fprintf(stderr, "Logfile invalid\n");
+			case SCALE:
+				// get iteration #
+				if (optarg[0] == "F" || optarg[0] == "C") {
+					scale = optarg[0];
+				} else {
+					fprintf(stderr, "Invalid argument(s)\n--scale option only accepts [C, F]\n");
 					exit(1);
 				}
 				break;
-
-			case 's':
-				if (optarg[0] == 'F' || optarg[0] == 'C') {
-					scale = optarg[0];
-					break;
+			case LOG:
+				// log file
+				file = fopen(optarg, "w+");
+				if(file == NULL) {
+					fprintf(stderr, "Failed to open log file");
+					exit(1);
 				}
-
+				break;
 			default:
-				fprintf(stderr, "Error in arguments.\n");
+				fprintf(stderr, "Invalid argument(s)\nYou may use --period=#, --scale=[C,F], --log=filepath\n");
 				exit(1);
 				break;
 		}
 	}
 
-	// temp = mraa_aio_init(A0);
+	initialize_the_sensors();
 
-	// if (temp== NULL) {
-	// 	fprintf(stderr, "Failed to initialize AIO\n");
-	// 	mraa_deinit();
-	// 	return EXIT_FAILURE;
-	// }
-
-	button = mraa_gpio_init(GPIO_50);
-
-	if (button == NULL) {
-		fprintf(stderr, "Failed to initialize GPIO_50\n");
-		mraa_deinit();
-		return EXIT_FAILURE;
-	}
-
-	mraa_gpio_dir(button, MRAA_GPIO_IN);
-	mraa_gpio_isr(button, MRAA_GPIO_EDGE_RISING, &shutdown, NULL);
-
-	struct pollfd pollInput; 
-	pollInput.fd = STDIN_FILENO; 
-	pollInput.events = POLLIN; 
+	struct pollfd pollfd;
+	pollfd.fd = 0;
+	pollfd.events = POLLIN;
 
 	char *input;
 	input = (char *)malloc(1024 * sizeof(char));
@@ -197,18 +201,27 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "Could not allocate input buffer\n");
 		exit(1);
 	}
+	while (true) {
+		// if it is time to report temperature && !stop
+		// read from temperature sensor, convert and report
+		report_temp();
 
-	while(1) {
-		time_stamp();
-		int ret = poll(&pollInput, 1, 0);
-		if(ret) {
-			fgets(input, 1024, stdin);
+		 // use poll syscalls, no or very short< 50ms timeout interval
+		int ret = poll(&pollfd, 1, 0);
+		if (ret) {   
+			fgets(input, 1024, 0);
 			process_stdin(input); 
-		}
+		} 	
+
+		// if (push button is pressed) 
+		// 	log and exit. 
 	}
 
 	// mraa_aio_close(temp);
 	mraa_gpio_close(button);
 
 	return 0;
+
+
+
 }
