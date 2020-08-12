@@ -6,40 +6,67 @@ ID: 304207830
 #ifdef DUMMY
 #define MRAA_GPIO_IN 0
 #define MRAA_GPIO_EDGE_RISING 1
-typedef int mraa_aio_context;
-typedef int mraa_gpio_context;
-int mraa_aio_read(mraa_aio_context c)    {
+struct _aio {
+	int pin;
+};
+struct _gpio {
+	int pin;
+};
+typedef struct _aio* mraa_aio_context;
+typedef struct _gpio* mraa_gpio_context;;
+int mraa_aio_read(mraa_aio_context c) {
+	if(c)
+		return 650;
 	return 650;
 }
 
-void mraa_aio_close(mraa_aio_context c)  {
+void mraa_aio_close(mraa_aio_context c) {
+	if(c)
+		return;
 	return;
 }
 
 mraa_aio_context mraa_aio_init(int num) {
-	return 1;
+	mraa_aio_context c = malloc(sizeof(struct _aio));
+	c->pin = num;
+	if(num)
+		return c;
+	return c;
 }
 
 mraa_gpio_context mraa_gpio_init(int num) {
-	return 1;
+	mraa_gpio_context c = malloc(sizeof(struct _gpio));
+	c->pin = num;
+	if(num)
+		return c;
+	return c;
 }
 
 void mraa_gpio_dir(mraa_gpio_context c, int i) {
+	if(c || i)
+		return;
 	return;
 }
 
 void mraa_gpio_isr(mraa_gpio_context c, int i, void* fun, void* k){
+	if(c || i || fun || k)
+		return;
 	return;
 }
 
+void mraa_gpio_close(mraa_gpio_context c) {
+	if(c)
+		return;
+	return;
+}
 
 #else
 #include <mraa.h>
 #include <mraa/aio.h>
 #endif
 
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <getopt.h>
 #include <poll.h>
@@ -201,7 +228,7 @@ int main(int argc, char* argv[]) {
 				// log file
 				log_flag = 1;
 				char* filename = optarg;
-				if ((logfd = creat(optarg, 0666)) < 0) {
+				if ((logfd = creat(filename, 0666)) < 0) {
 					fprintf(stderr, "--log=filename failed to create/write to file\n");
 					exit(1);
 				}
@@ -239,7 +266,7 @@ int main(int argc, char* argv[]) {
 			int i;
 			for(i = 0; i < res && index < 256; i++){
 				if(buffer[i] =='\n'){
-					process_stdin(&full_command);
+					process_stdin((char*)&full_command);
 					index = 0;
 				}
 				else {
