@@ -4,16 +4,9 @@ EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
 #ifdef DUMMY
-#define	MRAA_GPIO_IN	0
-typedef int mraa_aio_context;
-typedef int mraa_gpio_context;
-int mraa_aio_read(mraa_aio_context c)    {
-	return 650;
-}
-void mraa_aio_close(mraa_aio_context c)  {
-}
+#define DUM = 1;
 #else
-#include <mraa/aio.h>
+#define DUM = 0;
 #endif
 
 #include <unistd.h>
@@ -30,6 +23,7 @@ void mraa_aio_close(mraa_aio_context c)  {
 #include <math.h>
 #include <ctype.h>
 #include <mraa.h>
+#include <mraa/aio.h>
 
 #define PERIOD 'p'
 #define SCALE 's'
@@ -64,11 +58,11 @@ void curr_temp_report(float temperature){
 }
 
 void initialize_the_sensors() {
-	// temp = mraa_aio_init(1);
-	// if (temp == NULL) {
-	// 	fprintf(stderr, "Failed to init aio\n");
-	// 	exit(1);
-	// }
+	temp = mraa_aio_init(1);
+	if (temp == NULL && !DUM) {
+		fprintf(stderr, "Failed to init aio\n");
+		exit(1);
+	}
 
 	button = mraa_gpio_init(60);
 	if (button == NULL) {
@@ -103,7 +97,8 @@ void report_temp() {
 	if(difftime(end, begin) >= period && !stop) {
 		time(&begin);
 		int reading = mraa_aio_read(temp);
-		// int reading = 650;
+		if(DUM)
+			reading = 650;
 		float temperature = convert_temper_reading(reading);
 		curr_temp_report(temperature);
 	}
