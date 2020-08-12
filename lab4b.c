@@ -40,8 +40,8 @@ char scale = 'F';
 int stop = 0;
 time_t begin = 0;
 time_t end = 0;
-FILE *file = 0;
 int log_flag = 0;
+int logfd = 0;
 
 mraa_aio_context temp;
 mraa_gpio_context button;
@@ -170,8 +170,9 @@ int main(int argc, char* argv[]) {
 			case LOG:
 				// log file
 				log_flag = 1;
-				file = fopen(optarg, "w+");
-				if(file == NULL) {
+				char* filename = optarg;
+				logfd = creat(filename, 0666);
+				if(logfd < 0){
 					fprintf(stderr, "Failed to open log file");
 					exit(1);
 				}
