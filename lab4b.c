@@ -96,12 +96,14 @@ void report_temp() {
 
 float convert_temper_reading(int reading) {
 	float R = 1023.0/((float) reading) - 1.0;
+	float R0 = 100000.0;
+	float B = 4275;
 	R = R0*R;
 	//C is the temperature in Celcious
 	float C = 1.0/(log(R/R0)/B + 1/298.15) - 273.15;
 	//F is the temperature in Fahrenheit
 	float F = (C * 9)/5 + 32;
-	return flag == 'C'? C: F;
+	return (flag == 'C'? C: F)
 } 
 
 void process_stdin(char *input) {
@@ -121,10 +123,10 @@ void process_stdin(char *input) {
 		scale = 'C'; 
 	} else if(strcmp(input, "STOP") == 0) {
 		print(input, 0);
-		report = 0;
+		stop = 0;
 	} else if(strcmp(input, "START") == 0) {
 		print(input, 0);
-		report = 1;
+		stop = 1;
 	} else if(strcmp(input, "OFF") == 0) {
 		print(input, 0);
 		do_when_interrupted();
@@ -167,7 +169,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case SCALE:
 				// get iteration #
-				if (optarg[0] == "F" || optarg[0] == "C") {
+				if (optarg[0] == 'F' || optarg[0] == 'C') {
 					scale = optarg[0];
 				} else {
 					fprintf(stderr, "Invalid argument(s)\n--scale option only accepts [C, F]\n");
