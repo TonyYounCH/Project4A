@@ -212,12 +212,12 @@ int main(int argc, char* argv[]) {
 		 // use poll syscalls, no or very short< 50ms timeout interval
 		int ret = poll(&pollfd, 1, 0);
 		if(ret < 0){
-			print_errors("poll");
+			fprintf(stderr, "Failed to read from poll\n");
 		}
 		if(pollfd.revents && POLLIN){
 			int num = read(STDIN_FILENO, commandBuff, 128);
 			if(num < 0){
-				fprintf(stderr, "Failed to read from poll\n");
+				fprintf(stderr, "Failed to read from STDIN_FILENO\n");
 			}
 			int i;
 			for(i = 0; i < num && copyIndex < 128; i++){
