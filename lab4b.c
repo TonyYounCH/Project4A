@@ -35,7 +35,7 @@ mraa_gpio_context button;
 
 /* gets temperature */
 float get_temp() {
-	int temperature = mraa_aio_read(temp);
+	int temperature = 650;
 	int therm = 4275;
 	float nom = 100000.0;
 	float R = 1023.0/((float) temperature) - 1.0;
@@ -130,51 +130,51 @@ void process_stdin(char *input) {
 }
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
-	// struct option options[] = {
-	// 	{"period", required_argument, NULL, 'p'},
-	// 	{"scale", required_argument, NULL, 's'},
-	// 		{"log", required_argument, NULL, 'l'},
-	// 		{0, 0, 0, 0}
-	// };
+	struct option options[] = {
+		{"period", required_argument, NULL, 'p'},
+		{"scale", required_argument, NULL, 's'},
+			{"log", required_argument, NULL, 'l'},
+			{0, 0, 0, 0}
+	};
 
-	// int opt;
+	int opt;
 
-	// while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
-	// 	switch (opt) {
-	// 		case 'p': 
-	// 			period = atoi(optarg);
-	// 			break;
+	while ((opt = getopt_long(argc, argv, "", options, NULL)) != -1) {
+		switch (opt) {
+			case 'p': 
+				period = atoi(optarg);
+				break;
 
-	// 		case 'l':
-	// 			file = fopen(optarg, "w+");
-	// 			if(file == NULL) {
-	// 				fprintf(stderr, "Logfile invalid\n");
-	// 				exit(1);
-	// 			}
-	// 			break;
+			case 'l':
+				file = fopen(optarg, "w+");
+				if(file == NULL) {
+					fprintf(stderr, "Logfile invalid\n");
+					exit(1);
+				}
+				break;
 
-	// 		case 's':
-	// 			if (optarg[0] == 'F' || optarg[0] == 'C') {
-	// 				scale = optarg[0];
-	// 				break;
-	// 			}
+			case 's':
+				if (optarg[0] == 'F' || optarg[0] == 'C') {
+					scale = optarg[0];
+					break;
+				}
 
-	// 		default:
-	// 			fprintf(stderr, "Error in arguments.\n");
-	// 			exit(1);
-	// 			break;
-	// 	}
-	// }
-
-	temp = mraa_aio_init(A0);
-
-	if (temp== NULL) {
-		fprintf(stderr, "Failed to initialize AIO\n");
-		mraa_deinit();
-		return EXIT_FAILURE;
+			default:
+				fprintf(stderr, "Error in arguments.\n");
+				exit(1);
+				break;
+		}
 	}
+
+	// temp = mraa_aio_init(A0);
+
+	// if (temp== NULL) {
+	// 	fprintf(stderr, "Failed to initialize AIO\n");
+	// 	mraa_deinit();
+	// 	return EXIT_FAILURE;
+	// }
 
 	button = mraa_gpio_init(GPIO_50);
 
