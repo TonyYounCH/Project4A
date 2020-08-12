@@ -248,6 +248,7 @@ int main(int argc, char* argv[]) {
 	pollfd.fd = 0;
 	pollfd.events = POLLIN;
 
+	char buffer[256];
 	char full_command[256];
 	int index = 0;
 	while (1) {
@@ -260,7 +261,6 @@ int main(int argc, char* argv[]) {
 			fprintf(stderr, "Failed to read from poll\n");
 		}
 		if(pollfd.revents && POLLIN){
-			char buffer[256];
 			int res = read(0, buffer, 256);
 			if(res < 0){
 				fprintf(stderr, "Failed to read from STDIN_FILENO\n");
