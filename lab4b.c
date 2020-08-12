@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
 		if(ret < 0){
 			print_errors("poll");
 		}
-		if(polls[0].revents && POLLIN){
+		if(pollfd.revents && POLLIN){
 			int num = read(STDIN_FILENO, commandBuff, 128);
 			if(num < 0){
 				fprintf(stderr, "Failed to read from poll\n");
