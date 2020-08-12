@@ -80,20 +80,6 @@ void initialize_the_sensors() {
 
 }
 
-void report_temp() {
-	// if it is time to report temperature && !stop
-	// read from temperature sensor, convert and report
-	time(&end);
-	if(difftime(end, begin) < period && !stop) {
-		time(&begin);
-		// int reading = mraa_aio_read(temp);
-		int reading = 650;
-		float temperature = convert_temper_reading(reading);
-		curr_temp_report(temperature);
-
-	}
-}
-
 float convert_temper_reading(int reading) {
 	float R = 1023.0/((float) reading) - 1.0;
 	float R0 = 100000.0;
@@ -108,6 +94,20 @@ float convert_temper_reading(int reading) {
 	else
 		return F;
 } 
+
+void report_temp() {
+	// if it is time to report temperature && !stop
+	// read from temperature sensor, convert and report
+	time(&end);
+	if(difftime(end, begin) < period && !stop) {
+		time(&begin);
+		// int reading = mraa_aio_read(temp);
+		int reading = 650;
+		float temperature = convert_temper_reading(reading);
+		curr_temp_report(temperature);
+
+	}
+}
 
 void process_stdin(char *input) {
 	int EOL = strlen(input); 
