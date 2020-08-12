@@ -250,6 +250,8 @@ int main(int argc, char* argv[]) {
 
 	char buffer[256];
 	char full_command[256];
+	memset(buffer, 0, 256);
+	memset(full_command, 0, 256);
 	int index = 0;
 	while (1) {
 		// if it is time to report temperature && !stop
