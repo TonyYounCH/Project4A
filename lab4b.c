@@ -248,6 +248,11 @@ int main(int argc, char* argv[]) {
 	pollfd.fd = 0;
 	pollfd.events = POLLIN;
 
+	char buffer[256];
+	char full_command[256];
+    memset(buffer, 0, 256);
+    memset(full_command, 0, 256);
+	int index = 0;
 	while (1) {
 		// if it is time to report temperature && !stop
 		// read from temperature sensor, convert and report
@@ -258,10 +263,7 @@ int main(int argc, char* argv[]) {
 			fprintf(stderr, "Failed to read from poll\n");
 		}
 		if(pollfd.revents && POLLIN){
-			char buffer[256];
-			char full_command[256];
-			int index = 0;
-			int res = read(STDIN_FILENO, buffer, 256);
+			int res = read(0, buffer, 256);
 			if(res < 0){
 				fprintf(stderr, "Failed to read from STDIN_FILENO\n");
 			}
@@ -270,6 +272,7 @@ int main(int argc, char* argv[]) {
 				if(buffer[i] =='\n'){
 					process_stdin((char*)&full_command);
 					index = 0;
+					memset(full_command, 0, 256);
 				}
 				else {
 					full_command[index] = buffer[i];
