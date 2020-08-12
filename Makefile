@@ -3,7 +3,6 @@
 # ID: 304207830
 
 default:
-# 	gcc -g -lm -lmraa -Wall -Wextra -DDUMMY lab4b.c -o lab4b
 	chmod +x ./compile.sh
 	./compile.sh
 
@@ -13,7 +12,7 @@ check: default
 
 
 dist: check
-	tar -czf lab4b-304207830.tar.gz lab4b.c Makefile README compile.sh
+	tar -czf lab4b-304207830.tar.gz lab4b.c Makefile README compile.sh tests.sh
 
 clean:
 	rm -f *.o lab4b *.txt *.tar.gz
