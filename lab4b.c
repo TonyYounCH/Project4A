@@ -130,7 +130,7 @@ void process_stdin(char *input) {
 }
 
 
-int main(int argc, char* argv[]) {
+int main() {
 
 	// struct option options[] = {
 	// 	{"period", required_argument, NULL, 'p'},
