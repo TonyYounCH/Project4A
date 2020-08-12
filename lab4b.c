@@ -4,9 +4,38 @@ EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
 #ifdef DUMMY
-#define DUM 1
+#define MRAA_GPIO_IN 0
+#define MRAA_GPIO_EDGE_RISING 1
+typedef int mraa_aio_context;
+typedef int mraa_gpio_context;
+int mraa_aio_read(mraa_aio_context c)    {
+	return 650;
+}
+
+void mraa_aio_close(mraa_aio_context c)  {
+	return;
+}
+
+mraa_aio_context mraa_aio_init(int num) {
+	return 1;
+}
+
+mraa_gpio_context mraa_gpio_init(int num) {
+	return 1;
+}
+
+void mraa_gpio_dir(mraa_gpio_context c, int i) {
+	return;
+}
+
+void mraa_gpio_isr(mraa_gpio_context c, int i, void* fun, void* k){
+	return;
+}
+
+
 #else
-#define DUM 0
+#include <mraa.h>
+#include <mraa/aio.h>
 #endif
 
 #include <unistd.h>
@@ -22,8 +51,6 @@ ID: 304207830
 #include <sys/time.h>
 #include <math.h>
 #include <ctype.h>
-#include <mraa.h>
-#include <mraa/aio.h>
 
 #define PERIOD 'p'
 #define SCALE 's'
@@ -65,7 +92,7 @@ void curr_temp_report(float temperature){
 
 void initialize_the_sensors() {
 	temp = mraa_aio_init(1);
-	if (temp == NULL && !DUM) {
+	if (temp == NULL) {
 		fprintf(stderr, "Failed to init aio\n");
 		exit(1);
 	}
@@ -103,8 +130,8 @@ void report_temp() {
 	if(difftime(end, begin) >= period && !stop) {
 		time(&begin);
 		int reading = mraa_aio_read(temp);
-		if(DUM)
-			reading = 650;
+		// if(DUM)
+		// 	reading = 650;
 		float temperature = convert_temper_reading(reading);
 		curr_temp_report(temperature);
 	}
@@ -174,9 +201,8 @@ int main(int argc, char* argv[]) {
 				// log file
 				log_flag = 1;
 				char* filename = optarg;
-				logfd = creat(filename, 0666);
-				if(logfd < 0){
-					fprintf(stderr, "Failed to open log file");
+				if ((logfd = creat(optarg, 0666)) < 0) {
+					fprintf(stderr, "--log=filename failed to create/write to file\n");
 					exit(1);
 				}
 				break;
@@ -193,36 +219,32 @@ int main(int argc, char* argv[]) {
 	pollfd.fd = 0;
 	pollfd.events = POLLIN;
 
-	char commandBuff[128];
-	char copyBuff[128];
-	memset(commandBuff, 0, 128);
-	memset(copyBuff, 0, 128);
-	int copyIndex = 0;
 	while (1) {
 		// if it is time to report temperature && !stop
 		// read from temperature sensor, convert and report
 		report_temp();
 
 		 // use poll syscalls, no or very short< 50ms timeout interval
-		int ret = poll(&pollfd, 1, 0);
-		if(ret < 0){
+		if(poll(&pollfd, 1, 0) < 0){
 			fprintf(stderr, "Failed to read from poll\n");
 		}
 		if(pollfd.revents && POLLIN){
-			int num = read(STDIN_FILENO, commandBuff, 128);
-			if(num < 0){
+			char buffer[256];
+			char full_command[256];
+			int index = 0;
+			int res = read(STDIN_FILENO, buffer, 256);
+			if(res < 0){
 				fprintf(stderr, "Failed to read from STDIN_FILENO\n");
 			}
 			int i;
-			for(i = 0; i < num && copyIndex < 128; i++){
-				if(commandBuff[i] =='\n'){
-					process_stdin((char*)&copyBuff);
-					copyIndex = 0;
-					memset(copyBuff, 0, 128); //clear
+			for(i = 0; i < res && index < 256; i++){
+				if(buffer[i] =='\n'){
+					process_stdin(&full_command);
+					index = 0;
 				}
 				else {
-					copyBuff[copyIndex] = commandBuff[i];
-					copyIndex++;
+					full_command[index] = buffer[i];
+					index++;
 				}
 			}
 			
