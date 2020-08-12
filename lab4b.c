@@ -75,7 +75,7 @@ void initialize_the_sensors() {
 		exit(1);
 	}
 
-	mraa_gpio_dir(button, MPAA_GPIO_IN);
+	mraa_gpio_dir(button, MRAA_GPIO_IN);
 	mraa_gpio_isr(button, MRAA_GPIO_EDGE_RISING, &do_when_interrupted, NULL);
 
 }
