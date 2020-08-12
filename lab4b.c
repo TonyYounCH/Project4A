@@ -3,17 +3,17 @@ NAME: Changhui Youn
 EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
-#ifdef DUMMY
-#define	MRAA_GPIO_IN	0
-typedef int mraa_aio_context;
-typedef int mraa_gpio_context;
-int mraa_aio_read(mraa_aio_context c)    {
-	return 650;
-}
-void mraa_aio_close(mraa_aio_context c)  {
-}
-#else
-#endif
+// #ifdef DUMMY
+// #define	MRAA_GPIO_IN	0
+// typedef int mraa_aio_context;
+// typedef int mraa_gpio_context;
+// int mraa_aio_read(mraa_aio_context c)    {
+// 	return 650;
+// }
+// void mraa_aio_close(mraa_aio_context c)  {
+// }
+// #else
+// #endif
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -81,18 +81,16 @@ void initialize_the_sensors() {
 }
 
 float convert_temper_reading(int reading) {
+	int therm = 4275;
+	float nom = 100000.0;
 	float R = 1023.0/((float) reading) - 1.0;
-	float R0 = 100000.0;
-	float B = 4275;
-	R = R0*R;
-	//C is the temperature in Celcious
-	float C = 1.0/(log(R/R0)/B + 1/298.15) - 273.15;
-	//F is the temperature in Fahrenheit
-	float F = (C * 9)/5 + 32;
-	if(scale == 'C')
-		return C;
-	else
-		return F;
+	R *= nom;
+	float ret = 1.0/(log(R/nom)/therm + 1/298.15) - 273.15; 
+	if (scale == 'F') { //convert temperature to F
+		return (ret * 9)/5 + 32; 
+	} else { //return value in C
+		return ret; 
+	}
 } 
 
 void report_temp() {
