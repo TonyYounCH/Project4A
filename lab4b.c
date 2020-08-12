@@ -4,6 +4,10 @@ EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 */
 #ifdef DUMMY
+/*
+	Below is dummy code that only executes when -DDUMMY compile
+	It declares few functions that are in mraa
+*/
 #include <stdlib.h>
 #define MRAA_GPIO_IN 0
 #define MRAA_GPIO_EDGE_RISING 1
@@ -88,6 +92,7 @@ int logfd = 0;
 mraa_aio_context temp;
 mraa_gpio_context button;
 
+// This shuts down and prints SHUTDOWN message to output
 void do_when_interrupted() {
 	struct timespec ts;
 	struct tm * tm;
@@ -100,6 +105,7 @@ void do_when_interrupted() {
 	exit(0);
 }
 
+// This prints out executing time and read temperature 
 void curr_temp_report(float temperature){
 	struct timespec ts;
 	struct tm * tm;
@@ -111,6 +117,7 @@ void curr_temp_report(float temperature){
 	}
 }
 
+// Initializes the sensors
 void initialize_the_sensors() {
 	temp = mraa_aio_init(1);
 	if (temp == NULL) {
@@ -129,6 +136,7 @@ void initialize_the_sensors() {
 
 }
 
+// convert whatever output from the seonsor to desired scale
 float convert_temper_reading(int reading) {
 	float R = 1023.0/((float) reading) - 1.0;
 	float R0 = 100000.0;
@@ -158,20 +166,9 @@ void report_temp() {
 	}
 }
 
+// This function processes stdin
 void process_stdin(char *input) {
-	if(strcmp(input, "OFF") == 0){
-		if(log_flag)
-			dprintf(logfd, "OFF\n");
-		do_when_interrupted();
-	} else if(strcmp(input, "START") == 0){
-		stop = 0;
-		if(log_flag)
-			dprintf(logfd, "START\n");
-	} else if(strcmp(input, "STOP") == 0){
-		stop = 1;
-		if(log_flag)
-			dprintf(logfd, "STOP\n");
-	} else if(strcmp(input, "SCALE=F") == 0){
+	if(strcmp(input, "SCALE=F") == 0){
 		scale = 'F';
 		if(log_flag)
 			dprintf(logfd, "SCALE=F\n");
@@ -183,10 +180,22 @@ void process_stdin(char *input) {
 		period = (int)atoi(input+7);
 		if(log_flag)
 			dprintf(logfd, "PERIOD=%d\n", period);
+	} else if(strcmp(input, "STOP") == 0){
+		stop = 1;
+		if(log_flag)
+			dprintf(logfd, "STOP\n");
+	} else if(strcmp(input, "START") == 0){
+		stop = 0;
+		if(log_flag)
+			dprintf(logfd, "START\n");
 	} else if((strncmp(input, "LOG", sizeof(char)*3) == 0)){
 		if(log_flag){
 			dprintf(logfd, "%s\n", input);
 		}
+	} else if(strcmp(input, "OFF") == 0){
+		if(log_flag)
+			dprintf(logfd, "OFF\n");
+		do_when_interrupted();
 	} else {
 		fprintf(stdout, "Command cannot be recognized\n");
 		exit(1);
