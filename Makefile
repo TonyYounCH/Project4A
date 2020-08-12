@@ -8,27 +8,80 @@ default:
 	./compile.sh
 
 check: default
-	{ echo "START"; sleep 2; echo "STOP"; sleep 2; echo "OFF"; } | ./lab4b --log=log.txt
-
-	if [ $? -ne 0 ]
+	echo | ./lab4b --badArg &> /dev/null
+	if [[ $? -ne 1 ]]
 	then
-		echo "Error: program should have exited with 0"
+		echo "test for bad option failed"
 	else
-		echo "good return value!"
+		echo "test for bad option passed"
 	fi
 
-	for c in START STOP OFF SHUTDOWN
-		do
-			grep "$c" log.txt > /dev/null
-			if [ $? -ne 0 ]
-			then
-				echo "failed to log $c command"
-			else
-				echo "$c was logged successfully!"
-			fi
-		done
+	echo | ./lab4b --scale=badArg &> /dev/null
+	if [[ $? -ne 1 ]]
+	then	
+		echo "test for bad argument failed"
+	else
+		echo "test for bad argument passed"
+	fi
 
-	rm -f log.txt
+	./lab4b --period=3 --scale=F --log=LOG <<-EOF
+	SCALE=C
+	PERIOD=5
+	STOP
+	START
+	LOG 
+	OFF
+	EOF
+	if [[ $? -ne 0 ]]
+	then
+		echo "Test failed: Invalid exit code returned for correct input"
+	else
+		echo "Test passed: Valid exit code for correct input"
+	fi
+
+	if [ ! -s LOG ]
+	then
+		echo "Test failed: Logfile was not created"
+	else
+		echo "Test passed: Logfile created"
+	fi
+
+	grep "PERIOD=5" LOG &> /dev/null; \
+	if [[ $? -ne 0 ]]
+	then
+	        echo "Test failed: PERIOD was not logged in Logfile"
+	else
+	        echo "Test passed: PERIOD was logged in logfile"
+	fi
+
+
+	grep "SCALE=C" LOG &> /dev/null; \
+	if [[ $? -ne 0 ]]
+	then
+		echo "Test failed: SCALE was not logged in Logfile"
+	else
+		echo "Test passed: SCALE was logged in logfile"
+	fi
+
+	grep "LOG" LOG &> /dev/null; \
+	if [[ $? -ne 0 ]]
+	then
+	        echo "Test failed: LOG was not logged in Logfile"
+	else
+		echo "Test passed: LOG was logged in logfile"
+	fi
+
+	grep "SHUTDOWN" LOG &> /dev/null; \
+	if [[ $? -ne 0 ]]
+	then
+	        echo "Test failed: SHUTDOWN was not logged in Logfile"
+	else
+		echo "Test passed: SHUTDOWN was logged in logfile"
+	fi
+
+	rm -f LOG
+
+
 
 
 dist: check
