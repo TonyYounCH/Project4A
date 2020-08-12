@@ -103,7 +103,7 @@ float convert_temper_reading(int reading) {
 	float C = 1.0/(log(R/R0)/B + 1/298.15) - 273.15;
 	//F is the temperature in Fahrenheit
 	float F = (C * 9)/5 + 32;
-	return (flag == 'C'? C: F)
+	return (flag == 'C'? C: F);
 } 
 
 void process_stdin(char *input) {
