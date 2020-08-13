@@ -13,9 +13,9 @@ for i in SCALE START STOP PERIOD LOG OFF SHUTDOWN
 		grep "$i" log.txt > /dev/null
 		if [ $? -ne 0 ]
 		then
-			echo "$c command did not work or not logged"
+			echo "$i command did not work or not logged"
 		else
-			echo "$c command worked and was logged successfully!"
+			echo "$i command worked and was logged successfully!"
 		fi
 	done
 
