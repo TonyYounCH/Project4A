@@ -1,5 +1,5 @@
 #!/bin/bash
-{ echo "START"; sleep 2; echo "STOP"; sleep 2; echo "OFF"; } | ./lab4b --log=log.txt
+{ echo "SCALE=C"; sleep 2; echo "STOP"; sleep 2;echo "START"; sleep 2; echo "SCALE=F"; sleep 2; echo "PERIOD=3"; sleep 3;  echo "OFF"; } | ./lab4b --log=log.txt
 
 if [ $? -ne 0 ]
 then
@@ -19,4 +19,4 @@ for c in START STOP OFF SHUTDOWN
 		fi
 	done
 
-rm -f log.txt
+#rm -f log.txt
