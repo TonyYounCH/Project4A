@@ -274,8 +274,7 @@ int main(int argc, char* argv[]) {
 					process_stdin((char*)&full_command);
 					index = 0;
 					memset(full_command, 0, 256);
-				}
-				else {
+				} else {
 					full_command[index] = buffer[i];
 					index++;
 				}

@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# NAME: Changhui Youn
+# EMAIL: tonyyoun2@gmail.com
+# ID: 304207830
+
 { sleep 1; echo "SCALE=C"; sleep 2; echo "STOP"; sleep 2;echo "START"; sleep 2; echo "SCALE=F"; sleep 2; echo "PERIOD=3"; echo "LOG123"; sleep 3;  echo "OFF"; } | ./lab4b --log=log.txt
 
 if [ $? -ne 0 ]
