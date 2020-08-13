@@ -1,22 +1,22 @@
 #!/bin/bash
-{ echo "SCALE=C"; sleep 2; echo "STOP"; sleep 2;echo "START"; sleep 2; echo "SCALE=F"; sleep 2; echo "PERIOD=3"; sleep 3;  echo "OFF"; } | ./lab4b --log=log.txt
+{ sleep 1; echo "SCALE=C"; sleep 2; echo "STOP"; sleep 2;echo "START"; sleep 2; echo "SCALE=F"; sleep 2; echo "PERIOD=3"; echo "LOG123"; sleep 3;  echo "OFF"; } | ./lab4b --log=log.txt
 
 if [ $? -ne 0 ]
 then
-	echo "Error: program should have exited with 0"
+	echo "Program exited with error"
 else
-	echo "good return value!"
+	echo "Program ran successfully and exited with exit code 0"
 fi
 
-for c in START STOP OFF SHUTDOWN
+for i in SCALE START STOP PERIOD LOG OFF SHUTDOWN
 	do
-		grep "$c" log.txt > /dev/null
+		grep "$i" log.txt > /dev/null
 		if [ $? -ne 0 ]
 		then
-			echo "failed to log $c command"
+			echo "$c command did not work or not logged"
 		else
-			echo "$c was logged successfully!"
+			echo "$c command worked and was logged successfully!"
 		fi
 	done
 
-#rm -f log.txt
+rm -f log.txt
