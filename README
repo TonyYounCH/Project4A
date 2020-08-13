@@ -2,16 +2,20 @@ NAME: Changhui Youn
 EMAIL: tonyyoun2@gmail.com
 ID: 304207830
 
-Project4B is divided into parts :
-	- Do performance instrumentation and measurement to confirm the cause of the problem.
-	- Implement a new option to divide a list into sublists and support synchronization on sublists, thus allowing parallel access to the (original) list.
-	- Do new performance measurements to confirm that the problem has been solved.
+The main purpose of this project is to implement a working program that interacts with human and outside physical world. In order to do so, the beaglebone uses two module : the button to interact with human and the sensor to interact with ouside world. 
 
 
 ##################
 #    lab4b.c     #
 ##################
 
+It contains dummmy code that defines mraa variables and functions in case -DDUMMY option is specified when compiling. If so, it uses pre-defined functions instead of ones from mraa.h and mraa/aio.h in order to deal with not-working mraa-[gpio, aio] mapping. 
+
+The program accepts three options (period=#, scale=[C, F], log=filename). If not specified, period and scale are allocated with default value of 1 and F.
+
+It first initializes sensors (temp sensor and button) and for every period, it prints out time and current temperature in C or F depending on current scale. 
+
+Then, we use poll to read from stdin and process whatever input to change current status (START/STOP, PERIOD, SCALE...).
 
 
 ##################
